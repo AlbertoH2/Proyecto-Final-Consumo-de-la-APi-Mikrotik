@@ -1,0 +1,54 @@
+body {
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 11px;
+}
+img {border: none;}
+img:hover {opacity: 0.8;}
+h1 {
+  font-size: 1.7em;
+  display: inline;
+  margin-bottom: 10px;
+}
+#container {
+  width: 70%;
+  margin: 10% auto;
+}
+#box {
+  background: linear-gradient(#ffffff,#f3f3f3);
+  border: 1px solid #c1c1c1;
+  padding: 30px;
+}
+.floater {float: left; margin-right: 10px;}
+.floater label {display: block; text-align: center;}
+
+#login {margin: 2em 0 2em 0;}
+#login td {padding: 0 4px 0 0;}
+#login td.label {text-align: right;}
+
+#login input {
+  margin: 2px;
+  padding: 2px;
+  border: 1px solid #888;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+}
+#error {
+  color:red;
+  padding: 1em 0 0 0;
+}
+#login input[type=submit] {
+  box-shadow: inset 0px 1px 0px 0px #ffffff;
+  background-color: #ededed;
+  border-radius: 3px;
+  border: 1px solid #dcdcdc;
+  cursor: pointer;
+  color: #000;
+  font-size: 12px;
+  padding: 4px 24px;
+}
+#login input[type=submit]:hover {
+  background-color: #dfdfdf;
+}
+#login input[type=submit]:active {
+  position: relative;
+  top: 1px;
+}

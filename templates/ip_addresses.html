@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/istyle.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>Direcciones IP</title>
+</head>
+<body>
+    <!-- =============== Contenedor Principal ================ -->
+    <div class="container">
+        <!-- =============== Barra de Navegación ================ -->
+        <div class="navigation">
+            <ul>
+                <li>
+                    <a href="#">
+                        <span class="icon">
+                            <ion-icon name="wifi-outline"></ion-icon> <!-- Icono de wifi para MikroTik -->
+                        </span>
+                        <span class="title">Mikrotik</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{{ url_for('interfaces') }}">
+                        <span class="icon">
+                            <ion-icon name="home-outline"></ion-icon> <!-- Icono de hogar para Interfaces -->
+                        </span>
+                        <span class="title">Interfaces</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{{ url_for('usuarios') }}">
+                        <span class="icon">
+                            <ion-icon name="people-outline"></ion-icon> <!-- Icono de personas para Usuarios -->
+                        </span>
+                        <span class="title">Usuarios</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{{ url_for('ip_addresses') }}">
+                        <span class="icon">
+                            <ion-icon name="cloud-outline"></ion-icon> <!-- Icono de nube para IP Address -->
+                        </span>
+                        <span class="title">IP Address</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{{ url_for('queues') }}">
+                        <span class="icon">
+                            <ion-icon name="list-outline"></ion-icon> <!-- Icono de lista para Queues -->
+                        </span>
+                        <span class="title">Queues</span>
+                    </a>
+                </li>
+
+                <!-- Botón de Cerrar Sesión -->
+                <li>
+                    <a href="{{ url_for('login') }}"> <!-- Asegúrate de tener la ruta correcta para cerrar sesión -->
+                        <span class="icon">
+                            <ion-icon name="log-out-outline"></ion-icon> <!-- Icono de salir -->
+                        </span>
+                        <span class="title">Cerrar Sesión</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- ========================= Main ==================== -->
+        <div class="main">
+            <div class="topbar">
+                <div class="toggle">
+                    <ion-icon name="menu-outline"></ion-icon>
+                </div>
+            </div>
+
+            <!-- ========== Sección de Direcciones IP ========== -->
+            <div class="interfaces">
+                <h2>Lista de Direcciones IP</h2>
+                <table id="ipTable" border="1">
+                    <thead>
+                        <tr>
+                            <th>Dirección</th>
+                            <th>Red</th>
+                            <th>Interfaz</th>
+                            <th>Acciones</th> <!-- Nueva columna para el botón de eliminar -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Las filas se llenarán dinámicamente -->
+                    </tbody>
+                </table>
+
+                <!-- Botón para agregar una nueva IP -->
+                <button id="addIpBtn">Agregar Dirección IP</button>
+
+                <!-- Formulario para agregar una nueva IP -->
+                <div id="ipForm" style="display: none;">
+                    <h3>Agregar Dirección IP</h3>
+                    <label for="address">Dirección IP:</label>
+                    <input type="text" id="address" placeholder="Ej: 172.16.0.1/24">
+
+                    <label for="interface">Interfaz:</label>
+                    <select id="interface">
+                        <!-- Opciones se llenarán dinámicamente -->
+                    </select>
+
+                    <br>
+                    <button id="cancelBtn">Cancelar</button>
+                    <button id="applyBtn">Aplicar</button>
+                    <button id="okBtn" style="display: none;">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========== Scripts =========  -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            loadIpAddresses();
+
+            $('#addIpBtn').click(function() {
+                $('#ipForm').toggle();
+                $('#addIpBtn').hide();
+                loadInterfaces();  // Cargar interfaces dinámicamente
+            });
+
+            $('#cancelBtn').click(function() {
+                $('#ipForm').hide();
+                $('#addIpBtn').show();
+            });
+
+            $('#applyBtn').click(function() {
+                const address = $('#address').val();
+                const selectedInterface = $('#interface').val();
+
+                $.ajax({
+                    url: "{{ url_for('add_ip') }}",
+                    method: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({ address: address, interface: selectedInterface }),
+                    success: function(response) {
+                        if (response.success) {
+                            loadIpAddresses();  // Recargar la lista de IPs
+                            $('#ipForm').hide();
+                            $('#addIpBtn').show();
+                            $('#address').val('');
+                        } else {
+                            alert('Error al agregar la dirección IP');
+                        }
+                    },
+                    error: function(error) {
+                        console.error('Error al agregar la dirección IP:', error);
+                    }
+                });
+            });
+        });
+
+        function loadIpAddresses() {
+            $.ajax({
+                url: "{{ url_for('get_ip_addresses') }}",
+                method: "GET",
+                success: function(data) {
+                    const tableBody = $('#ipTable tbody');
+                    tableBody.empty();  // Limpiar la tabla
+                    data.forEach(ip => {
+                        const row = `
+                            <tr>
+                                <td>${ip.address}</td>
+                                <td>${ip.network}</td>
+                                <td>${ip.interface}</td>
+                                <td><button class="deleteBtn" data-ip="${ip.address}">Eliminar</button></td> <!-- Botón de eliminar -->
+                            </tr>
+                        `;
+                        tableBody.append(row);
+                    });
+
+                    // Agregar el evento de eliminación a los botones de eliminar
+                    $('.deleteBtn').click(function() {
+                        const ipAddress = $(this).data('ip');
+                        deleteIpAddress(ipAddress);
+                    });
+                },
+                error: function(error) {
+                    console.error('Error al cargar las direcciones IP:', error);
+                }
+            });
+        }
+
+        function loadInterfaces() {
+            $.ajax({
+                url: "{{ url_for('get_interfaces') }}",
+                method: "GET",
+                success: function(data) {
+                    const interfaceSelect = $('#interface');
+                    interfaceSelect.empty();  // Limpiar las opciones
+                    data.forEach(iface => {
+                        const option = $('<option>').val(iface.name).text(iface.name);
+                        interfaceSelect.append(option);
+                    });
+                },
+                error: function(error) {
+                    console.error('Error al cargar las interfaces:', error);
+                }
+            });
+        }
+
+        function deleteIpAddress(ipAddress) {
+            if (confirm(`¿Estás seguro de que deseas eliminar la dirección IP ${ipAddress}?`)) {
+                $.ajax({
+                    url: "{{ url_for('eliminar_ip') }}",  // Usar el nombre correcto de la ruta
+                    method: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({ address: ipAddress }),
+                    success: function(response) {
+                        if (response.success) {
+                            alert('Eliminada correctamente');
+                            loadIpAddresses();  // Recargar la lista de IPs
+                        } else {
+                            alert('Error al eliminar la dirección IP');
+                        }
+                    },
+                    error: function(error) {
+                        console.error('Error al eliminar la dirección IP:', error);
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>

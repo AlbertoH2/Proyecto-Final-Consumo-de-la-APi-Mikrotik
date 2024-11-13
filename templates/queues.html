@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración de Queues</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/istyle.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- =============== Contenedor Principal ================ -->
+    <div class="container">
+        <!-- =============== Barra de Navegación ================ -->
+        <div class="navigation">
+            <ul>
+                <li>
+                    <a href="#">
+                        <span class="icon">
+                            <ion-icon name="wifi-outline"></ion-icon> <!-- Icono de wifi para MikroTik -->
+                        </span>
+                        <span class="title">Mikrotik</span>
+                    </a>
+                    
+                </li>
+        
+                <li>
+                    <a href="{{ url_for('interfaces') }}">
+                        <span class="icon">
+                            <ion-icon name="home-outline"></ion-icon> <!-- Icono de hogar para Interfaces -->
+                        </span>
+                        <span class="title">Interfaces</span>
+                    </a>
+                </li>
+        
+                <li>
+                    <a href="{{ url_for('usuarios') }}">
+                        <span class="icon">
+                            <ion-icon name="people-outline"></ion-icon> <!-- Icono de personas para Usuarios -->
+                        </span>
+                        <span class="title">Usuarios</span>
+                    </a>
+                </li>
+        
+                <li>
+                    <a href="{{ url_for('ip_addresses') }}">
+                        <span class="icon">
+                            <ion-icon name="cloud-outline"></ion-icon> <!-- Icono de nube para IP Address -->
+                        </span>
+                        <span class="title">IP Address</span>
+                    </a>
+                </li>
+        
+                <li>
+                    <a href="{{ url_for('queues') }}">
+                        <span class="icon">
+                            <ion-icon name="list-outline"></ion-icon> <!-- Icono de lista para Queues -->
+                        </span>
+                        <span class="title">Queues</span>
+                    </a>
+                </li>
+            <!-- Botón de Cerrar Sesión -->
+            <li>
+                <a href="{{ url_for('login') }}"> <!-- Asegúrate de tener la ruta correcta para cerrar sesión -->
+                    <span class="icon">
+                        <ion-icon name="log-out-outline"></ion-icon> <!-- Icono de salir -->
+                    </span>
+                    <span class="title">Cerrar Sesión</span>
+                </a>
+            </li>
+            </ul>
+        </div>
+        
+
+        <!-- ========================= Main ==================== -->
+        <div class="main">
+            <div class="topbar">
+                <div class="toggle">
+                    <ion-icon name="menu-outline"></ion-icon>
+                </div>
+            </div>
+
+            <!-- ========== Sección de Queues ========== -->
+            <div class="interfaces">
+                <h2>Administración de Queues</h2>
+
+                <!-- Habilitar Queue -->
+                <label>
+                    <input type="checkbox" id="enableQueue">
+                    Enable
+                </label>
+
+                <!-- Comentario -->
+                <div>
+                    <label for="comment">Comment:</label>
+                    <input type="text" id="comment" placeholder="Escribe un comentario">
+                </div>
+
+                <!-- Menú General -->
+                <div>
+                    <div class="menu-toggle" onclick="toggleMenu('general')">
+                        <i class="fas fa-caret-right"></i> General
+                    </div>
+                    <div id="general" class="toggle-content">
+                        <label for="name">Name:</label>
+                        <input type="text" id="name">
+
+                        <div class="menu-toggle" onclick="toggleMenu('target')">
+                            <i class="fas fa-caret-right"></i> Target
+                        </div>
+                        <div id="target" class="toggle-content">
+                            <input type="text" placeholder="0.0.0.0/0" id="targetIp">
+                        </div>
+
+                        <div class="menu-toggle" onclick="toggleMenu('dst')">
+                            <i class="fas fa-caret-right"></i> Dst
+                        </div>
+                        <div id="dst" class="toggle-content">
+                            <input type="text" placeholder="0.0.0.0/0" id="dstIp">
+                        </div>
+
+                        <label for="maxLimit">Max Limit:</label>
+                        <div>
+                            <label for="maxUpload">Target Upload:</label>
+                            <input type="text" id="maxUpload" placeholder="Ejemplo: 10M">
+                            <label for="maxDownload">Target Download:</label>
+                            <input type="text" id="maxDownload" placeholder="Ejemplo: 10M">
+                        </div>
+
+                        <div class="menu-toggle" onclick="toggleMenu('burst')">
+                            <i class="fas fa-caret-right"></i> Burst
+                        </div>
+                        <div id="burst" class="toggle-content">
+                            <label for="burstLimit">Burst Limit:</label>
+                            <input type="text" id="burstLimit" placeholder="Ejemplo: 20M">
+                            
+                            <label for="burstThreshold">Burst Threshold:</label>
+                            <input type="text" id="burstThreshold" placeholder="Ejemplo: 10M">
+
+                            <label for="burstTime">Burst Time:</label>
+                            <input type="text" id="burstTime" placeholder="Ejemplo: 30s">
+                        </div>
+
+                        <div class="menu-toggle" onclick="toggleMenu('time')">
+                            <i class="fas fa-caret-right"></i> Time
+                        </div>
+                        <div id="time" class="toggle-content">
+                            <label for="timeValue">Time:</label>
+                            <input type="text" id="timeValue" placeholder="Ejemplo: 00:00-23:59">
+
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="day" value="sun"> Sun</label>
+                                <label><input type="checkbox" name="day" value="mon"> Mon</label>
+                                <label><input type="checkbox" name="day" value="tue"> Tue</label>
+                                <label><input type="checkbox" name="day" value="wed"> Wed</label>
+                                <label><input type="checkbox" name="day" value="thu"> Thu</label>
+                                <label><input type="checkbox" name="day" value="fri"> Fri</label>
+                                <label><input type="checkbox" name="day" value="sat"> Sat</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botón Guardar -->
+                <button onclick="guardarConfiguracion()">Guardar</button>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <script>
+        function toggleMenu(menuId) {
+            const menu = document.getElementById(menuId);
+            const icon = menu.previousElementSibling.querySelector('i');
+
+            // Alternar la clase active
+            menu.classList.toggle('active'); 
+
+            // Cambiar icono de flecha
+            icon.classList.toggle('fa-caret-right');
+            icon.classList.toggle('fa-caret-down');
+
+            // Si es el menú General, ocultar o mostrar los otros menús
+            if (menuId === 'general') {
+                const elementsToToggle = ['target', 'dst', 'maxLimit', 'burst', 'time'];
+                elementsToToggle.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.classList.toggle('active');
+                    }
+                });
+            }
+        }
+
+        function guardarConfiguracion() {
+            const enableQueue = document.getElementById("enableQueue").checked;
+            const comment = document.getElementById("comment").value;
+            const name = document.getElementById("name").value;
+            const target = document.getElementById("targetIp").value;
+            const dst = document.getElementById("dstIp").value;
+            const maxUpload = document.getElementById("maxUpload").value;
+            const maxDownload = document.getElementById("maxDownload").value;
+            const burstLimit = document.getElementById("burstLimit").value;
+            const burstThreshold = document.getElementById("burstThreshold").value;
+            const burstTime = document.getElementById("burstTime").value;
+            const timeValue = document.getElementById("timeValue").value;
+            
+            const days = Array.from(document.querySelectorAll('input[name="day"]:checked'))
+                            .map(day => day.value);
+    
+            const configData = {
+                enableQueue,
+                comment,
+                name,
+                target,
+                dst,
+                maxLimit: {
+                    upload: maxUpload,
+                    download: maxDownload
+                },
+                burst: {
+                    burstLimit,
+                    burstThreshold,
+                    burstTime
+                },
+                time: {
+                    timeValue,
+                    days
+                }
+            };
+    
+            console.log("Configuración guardada:", configData);
+            
+            // Enviar los datos al backend
+            fetch('/add_queue', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(configData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert("Configuración guardada exitosamente");
+                } else {
+                    return response.json().then(errorData => {
+                        alert("Error al guardar la configuración: " + errorData.error);
+                    });
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuarios MikroTik</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/istyle.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <!-- =============== Contenedor Principal ================ -->
+    <div class="container">
+        <!-- =============== Barra de Navegación ================ -->
+        <div class="navigation">
+            <ul>
+                <li>
+                    <a href="#">
+                        <span class="icon">
+                            <ion-icon name="wifi-outline"></ion-icon> <!-- Icono de wifi para MikroTik -->
+                        </span>
+                        <span class="title">Mikrotik</span>
+                    </a>
+                    
+                </li>
+        
+                <li>
+                    <a href="{{ url_for('interfaces') }}">
+                        <span class="icon">
+                            <ion-icon name="home-outline"></ion-icon> <!-- Icono de hogar para Interfaces -->
+                        </span>
+                        <span class="title">Interfaces</span>
+                    </a>
+                </li>
+        
+                <li>
+                    <a href="{{ url_for('usuarios') }}">
+                        <span class="icon">
+                            <ion-icon name="people-outline"></ion-icon> <!-- Icono de personas para Usuarios -->
+                        </span>
+                        <span class="title">Usuarios</span>
+                    </a>
+                </li>
+        
+                <li>
+                    <a href="{{ url_for('ip_addresses') }}">
+                        <span class="icon">
+                            <ion-icon name="cloud-outline"></ion-icon> <!-- Icono de nube para IP Address -->
+                        </span>
+                        <span class="title">IP Address</span>
+                    </a>
+                </li>
+        
+                <li>
+                    <a href="{{ url_for('queues') }}">
+                        <span class="icon">
+                            <ion-icon name="list-outline"></ion-icon> <!-- Icono de lista para Queues -->
+                        </span>
+                        <span class="title">Queues</span>
+                    </a>
+                </li>
+            <!-- Botón de Cerrar Sesión -->
+            <li>
+                <a href="{{ url_for('login') }}"> <!-- Asegúrate de tener la ruta correcta para cerrar sesión -->
+                    <span class="icon">
+                        <ion-icon name="log-out-outline"></ion-icon> <!-- Icono de salir -->
+                    </span>
+                    <span class="title">Cerrar Sesión</span>
+                </a>
+            </li>
+            </ul>
+        </div>
+        
+
+        <!-- ========================= Main ==================== -->
+        <div class="main">
+            <div class="topbar">
+                <div class="toggle">
+                    <ion-icon name="menu-outline"></ion-icon>
+                </div>
+            </div>
+
+            <!-- ========== Sección de Usuarios ========== -->
+            <div class="interfaces">
+                <h2>Lista de Usuarios</h2>
+                <table border="1" id="usuarios-table">
+                    <thead>
+                        <tr>
+                            <th>Comment</th>
+                            <th>Name</th>
+                            <th>Group</th>
+                            <th>Allowed Address</th>
+                            <th>Last Logged In</th>
+                            <th>Acciones</th> <!-- Columna para el botón de eliminar -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Aquí se llenarán los datos dinámicamente -->
+                    </tbody>
+                </table>
+                <button id="agregar-usuario">Agregar Usuario</button>
+
+                <!-- Formulario para agregar un usuario -->
+                <div id="form-agregar-usuario" style="display:none;">
+                    <h3>Agregar Usuario</h3>
+                    <form id="usuario-form">
+                        <label>
+                            <input type="checkbox" id="enable" name="enable"> Enable
+                        </label>
+                        <br>
+                        <label for="comment">Comment:</label>
+                        <input type="text" id="comment" name="comment">
+                        <br>
+                        <label for="name">Name:</label>
+                        <input type="text" id="name" name="name" required>
+                        <br>
+                        <label for="group">Group:</label>
+                        <select id="group" name="group">
+                            <option value="full">full</option>
+                            <option value="read">read</option>
+                            <option value="write">write</option>
+                        </select>
+                        <br>
+                        <label for="allowed_address">Allowed Address:</label>
+                        <input type="text" id="allowed_address" name="allowed_address">
+                        <br>
+                        <label>Last Logged In:</label>
+                        <span id="last_logged_in">N/A</span>
+                        <br>
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" name="password" required>
+                        <br>
+                        <label for="confirm_password">Confirm Password:</label>
+                        <input type="password" id="confirm_password" name="confirm_password" required>
+                        <br>
+                        <button type="button" id="cancelar">Cancelar</button>
+                        <button type="submit">Aplicar</button>
+                        <button type="button" id="ok">Ok</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========== Scripts =========  -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            loadUsuarios();
+
+            $('#agregar-usuario').click(function() {
+                $('#form-agregar-usuario').toggle();
+                $('#usuario-form')[0].reset();  // Esto limpia los campos del formulario
+            });
+
+            $('#usuario-form').submit(function(event) {
+                event.preventDefault();
+
+                // Obtener los valores de los campos de contraseña
+                var password = $('#password').val();
+                var confirmPassword = $('#confirm_password').val();
+
+                // Verificar si las contraseñas coinciden
+                if (password !== confirmPassword) {
+                    alert("Las contraseñas no coinciden. Por favor, verifica nuevamente.");
+                    return false;  // Evitar el envío del formulario
+                }
+
+                $.ajax({
+                    url: "{{ url_for('add_user') }}",
+                    method: "POST",
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        alert('Usuario agregado exitosamente');
+                        $('#form-agregar-usuario').hide();
+                        loadUsuarios();
+                    },
+                    error: function(error) {
+                        alert('Error al agregar el usuario: ' + error.responseJSON.error);
+                        console.error(error);
+                    }
+                });
+            });
+
+            $('#cancelar').click(function() {
+                $('#form-agregar-usuario').hide();
+                $('#usuario-form')[0].reset();  // Esto limpia los campos del formulario
+            });
+        });
+
+        function eliminarUsuario(username) {
+            if (confirm("¿Estás seguro de que quieres eliminar este usuario?")) {
+                $.ajax({
+                    url: "{{ url_for('eliminar_usuario') }}",  // Ruta que manejará la eliminación
+                    method: "POST",  // Puedes usar DELETE si prefieres
+                    data: { username: username },
+                    success: function(response) {
+                        alert('Usuario eliminado exitosamente');
+                        loadUsuarios();  // Recargar la lista de usuarios
+                    },
+                    error: function(error) {
+                        alert('Error al eliminar el usuario');
+                        console.error(error);
+                    }
+                });
+            }
+        }
+        
+
+        function loadUsuarios() {
+            $.ajax({
+                url: "{{ url_for('get_usuarios') }}",
+                method: "GET",
+                data: {
+                    username: "{{ request.args.get('username') }}",
+                    password: "{{ request.args.get('password') }}"
+                },
+                success: function(data) {
+                    var tbody = $('#usuarios-table tbody');
+                    tbody.empty();
+                    data.forEach(function(usuario) {
+                        var row = `
+                            <tr>
+                                <td>${usuario.comment || ''}</td>
+                                <td>${usuario.name}</td>
+                                <td>${usuario.group}</td>
+                                <td>${usuario.allowed_address || ''}</td>
+                                <td>${usuario.last_logged_in || ''}</td>
+                                <td>
+                                    <button class="eliminar-usuario" data-username="${usuario.name}">Eliminar</button>
+                                </td>
+                            </tr>
+                        `;
+                        tbody.append(row);
+                    });
+                    // Asignar el evento al botón de eliminar
+                    $('.eliminar-usuario').click(function() {
+                        var username = $(this).data('username');  // Obtener el nombre del usuario desde el atributo data-username
+                        eliminarUsuario(username);
+                    });
+                },
+                error: function(error) {
+                    console.error("Error al cargar los usuarios:", error);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

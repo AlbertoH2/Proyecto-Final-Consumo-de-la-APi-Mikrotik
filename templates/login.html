@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link rel="icon" href="/favicon.png">
+    <link rel="icon" href="/favicon.svg">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title>RouterOS</title>
+    <script src="script.js"></script>
+</head>
+<body>
+    <div id="container">
+        <div id="box">
+            <a href="https://mikrotik.com"><img src="{{ url_for('static', filename='img/mikrotik-logo.png') }}" style="float: right;" alt="Mikrotik"></a><br style="clear: both;">
+            <h1>RouterOS</h1>
+            <p>You have connected to a router. Administrative access only. If this device is not in your possession, please contact your local network administrator.</p>
+            <form id="login" method="post" action="/">
+                <table>
+                    <tr>
+                        <td class="label"><label for="name">Login:</label></td>
+                        <td><input id="name" name="username" autocomplete="username" type="text" value="admin"></td>
+                    </tr>
+                    <tr>
+                        <td class="label"><label for="password">Password:</label></td>
+                        <td><input id="password" name="password" type="password" autofocus></td>
+                        <td><input type="submit" value="Login"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            <div id="error">
+                                {% with messages=get_flashed_messages() %}
+                                    {% if messages %}
+                                        <div class="alert alert-danger">{{ messages[0] }}</div>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+                            
+                        </td>
+                    </tr>
+                </table>
+            </form>
+            <div>
+                <div class="floater"><a href="https://mt.lv/winbox64"><img src="{{ url_for('static', filename='img/winbox.png') }}" alt="Winbox"></a><br><label>Winbox</label></div>
+                <div class="floater"><a href="/graphs"><img src="{{ url_for('static', filename='img/green.png') }}" alt="Graphs"></a><br><label>Graphs</label></div>
+                <div class="floater"><a href="/help/license.html"><img src="{{ url_for('static', filename='img/license.png') }}" alt="License"></a><br><label>License</label></div>
+                <div class="floater"><a href="https://help.mikrotik.com/docs/"><img src="{{ url_for('static', filename='img/help.png') }}" alt="Help"></a><br><label>Help</label></div>
+            </div>
+            <br style="clear: both">
+            <div style="float: right">&copy; <a href="https://mikrotik.com">mikrotik</a></div>
+        </div>
+    </div>
+</body>
+</html>
